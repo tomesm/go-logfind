@@ -16,13 +16,17 @@ type Finder struct {
 	text    string
 }
 
+func fullPath(path string) string {
+	if !strings.HasSuffix(path, "/") {
+		return path + "/"
+	}
+	return path
+}
+
 // New creates a new Finder struct to perform search
 func New(dirName string, text string) *Finder {
-	if !strings.HasSuffix(dirName, "/") {
-		dirName = dirName + "/"
-	}
 	return &Finder{
-		dirName: dirName,
+		dirName: fullPath(dirName),
 		text:    text,
 	}
 }
@@ -39,7 +43,7 @@ func (f *Finder) searchFile(fname string, wg *sync.WaitGroup) {
 	lnum := 1
 
 	for s.Scan() {
-		if strings.Contains(s.Text(), f.text) {
+		if strings.Contains(strings.ToLower(s.Text()), strings.ToLower(f.text)) {
 			fmt.Printf("%s : %d : %s\n", fname, lnum, s.Text())
 		}
 		lnum++
