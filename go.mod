@@ -1,4 +1,4 @@
-module github.com/tomesm/logfind
+module github.com/tomesm/go-logfind
 
 go 1.12
 
