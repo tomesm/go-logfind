@@ -36,55 +36,43 @@ func TestFullPath(t *testing.T) {
 	}
 }
 
-func TestMatchStrings(t *testing.T) {
+func TestMatch(t *testing.T) {
 	tests := []struct {
-		name   string
-		str    string
-		substr string
-		want   bool
+		name    string
+		str     string
+		substrs []string
+		want    int
 	}{
 		{
-			name:   "Is a match: Camel Case",
-			str:    "buildInstallPlanReturningError:]: file://",
-			substr: "Error",
-			want:   true,
+			name:    "Match all",
+			str:     "buildInstallPlanReturningError:]: file://",
+			substrs: []string{"Error", "plan", "FILE"},
+			want:    3,
 		},
 		{
-			name:   "Is a match: Upper Case",
-			str:    "buildInstallPlanReturningError:]: file://",
-			substr: "ERROR",
-			want:   true,
+			name:    "Match some",
+			str:     "buildInstallPlanReturningError:]: file://",
+			substrs: []string{"ERROR", "File"},
+			want:    2,
 		},
 		{
-			name:   "Is a match: Lower Case",
-			str:    "buildInstallPlanReturningError:]: file://",
-			substr: "error",
-			want:   true,
+			name:    "No Match",
+			str:     "buildInstallPlanReturningError:]: file://",
+			substrs: []string{"System", "WIN"},
+			want:    0,
 		},
 		{
-			name:   "Not a match: Lower Case",
-			str:    "buildInstallPlanReturningError:]: file://",
-			substr: "login",
-			want:   false,
-		},
-		{
-			name:   "Not a match: Upper Case",
-			str:    "buildInstallPlanReturningError:]: file://",
-			substr: "LOGIN",
-			want:   false,
-		},
-		{
-			name:   "Not a match: Camel Case",
-			str:    "buildInstallPlanReturningError:]: file://",
-			substr: "Login",
-			want:   false,
+			name:    "Empty",
+			str:     "buildInstallPlanReturningError:]: file://",
+			substrs: []string{"", "", ""},
+			want:    0,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			match := isMatch(tt.str, tt.substr)
+			match := findMatch(tt.str, tt.substrs)
 			if match != tt.want {
-				t.Errorf("want %t; got %t", tt.want, match)
+				t.Errorf("want %d; got %d", tt.want, match)
 			}
 		})
 	}

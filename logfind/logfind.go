@@ -2,7 +2,6 @@ package logfind
 
 import (
 	"bufio"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -13,14 +12,16 @@ import (
 // Finder  is a struct holding all necessary information about searched Finderectory
 type Finder struct {
 	dirName string
-	text    string
+	texts   []string
+	all     bool
 }
 
 // New creates a new Finder struct to perform search
-func New(dirName string, text string) *Finder {
+func New(dirName string, texts []string, all bool) *Finder {
 	return &Finder{
 		dirName: fullPath(dirName),
-		text:    text,
+		texts:   texts,
+		all:     all,
 	}
 }
 
@@ -36,8 +37,13 @@ func (f *Finder) searchFile(fname string, wg *sync.WaitGroup) {
 	lnum := 1
 
 	for s.Scan() {
-		if isMatch(s.Text(), f.text) {
-			fmt.Printf("%s : %d : %s\n", fname, lnum, s.Text())
+		matches := findMatch(s.Text(), f.texts)
+
+		if f.all && matches == len(f.texts) {
+			printLine(fname, lnum, s.Text())
+			break
+		} else if !f.all && matches > 0 {
+			printLine(fname, lnum, s.Text())
 		}
 		lnum++
 	}
