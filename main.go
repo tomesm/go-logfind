@@ -11,14 +11,14 @@ import (
 func main() {
 	flag.Usage = myUsage
 	dirname := flag.String("dirname", "/var/log", "Name of dir to search")
-	all := flag.Bool("all", false, "Determine if search should match all strings")
+	matchAll := flag.Bool("match-all", false, "Determine if search should match all searched strings")
 	flag.Parse()
 
 	if flag.NArg() == 0 {
 		flag.Usage()
 		os.Exit(1)
 	}
-	logfind := logfind.New(*dirname, flag.Args(), *all)
+	logfind := logfind.New(*dirname, flag.Args(), *matchAll)
 	logfind.Search()
 }
 
