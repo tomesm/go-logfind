@@ -20,6 +20,12 @@ type Finder struct {
 
 // Result represents formatted JSON output of the search
 type Result struct {
+	Directory string
+	Files     []LogFile
+}
+
+// File holds log records from particular file
+type LogFile struct {
 	File  string `json:"file"`
 	Lines []Line `json:"lines"`
 }
@@ -47,17 +53,35 @@ func (f *Finder) Search() {
 	}
 	var wg sync.WaitGroup
 
+	var logFiles []LogFile
+
 	for _, file := range files {
+		ch := make(chan *LogFile)
 		if strings.HasSuffix(file.Name(), ".log") {
 			wg.Add(1)
-			go f.searchFile(file.Name(), &wg)
+			go f.searchFile(file.Name(), &wg, ch)
 		}
+		f := <-ch
+		// TODO: fix deadlock
+		logFiles = append(logFiles, *f)
 	}
 	wg.Wait()
+
+	result := Result{
+		Directory: f.dirName,
+		Files:     logFiles,
+	}
+	var jsonData []byte
+
+	jsonData, err = json.Marshal(result)
+	if err != nil {
+		return
+	}
+	fmt.Printf("%s\n", string(jsonData))
 }
 
 // Searches given file
-func (f *Finder) searchFile(fname string, wg *sync.WaitGroup) {
+func (f *Finder) searchFile(fname string, wg *sync.WaitGroup, ch chan<- *LogFile) {
 	file, err := os.Open(f.dirName + fname)
 	if err != nil {
 		log.Fatal(err)
@@ -85,18 +109,12 @@ func (f *Finder) searchFile(fname string, wg *sync.WaitGroup) {
 	if err := s.Err(); err != nil {
 		log.Fatal(err)
 	}
-	// TODO: create a channel to send Lines to one result??
-	result := Result{
+	logFile := LogFile{
 		File:  fname,
 		Lines: lines,
 	}
-	var jsonData []byte
 
-	jsonData, err = json.Marshal(result)
-	if err != nil {
-		return
-	}
-	fmt.Printf("%s\n", string(jsonData))
+	ch <- &logFile
 }
 
 func toJSON(lnum int, log string) *Line {

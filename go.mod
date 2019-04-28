@@ -3,6 +3,7 @@ module github.com/tomesm/go-logfind
 go 1.12
 
 require (
+	github.com/golang/example v0.0.0-20170904185048-46695d81d1fa // indirect
 	github.com/google/pprof v0.0.0-20190404155422-f8f10df84213 // indirect
 	github.com/gookit/color v1.1.6
 	github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6 // indirect

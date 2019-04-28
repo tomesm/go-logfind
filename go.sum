@@ -1,3 +1,5 @@
+github.com/golang/example v0.0.0-20170904185048-46695d81d1fa h1:iqCQC2Z53KkwGgTN9szyL4q0OQHmuNjeoNnMT6lk66k=
+github.com/golang/example v0.0.0-20170904185048-46695d81d1fa/go.mod h1:tO/5UvQ/uKigUjQBPqzstj6uxd3fUIjddi19DxGJeWg=
 github.com/google/pprof v0.0.0-20190404155422-f8f10df84213 h1:y77GPNuZbqlt3/OjKA9yysnnxxqW+XwLaGY3ol9Mgmc=
 github.com/google/pprof v0.0.0-20190404155422-f8f10df84213/go.mod h1:zfwlbNMJ+OItoe0UupaVj+oy1omPYYDuagoSzA8v9mc=
 github.com/gookit/color v1.1.6 h1:CisXBwYhzdPZUV+F8J4N3nzTclW78mOYz6TbPwUmhV4=
