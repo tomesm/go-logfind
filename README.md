@@ -6,7 +6,7 @@ Tool for searching log files in a direcotry for given text.
 ```
 logfind [OPTIONS] [TEXT]
 
-  -dirname string`                                                           
+  -dirname string                                                           
     Name of dir to search (default "/var/log")                           
   -match-all                                                                 
         Determine if search should match all searched strings (default "false")
