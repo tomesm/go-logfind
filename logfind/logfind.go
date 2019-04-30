@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"sync"
 )
 
 // Finder  is a struct holding matchAll necessary information about searched Finderectory
@@ -24,7 +23,7 @@ type Result struct {
 	Files     []LogFile
 }
 
-// File holds log records from particular file
+// LogFile holds log records from particular file
 type LogFile struct {
 	File  string `json:"file"`
 	Lines []Line `json:"lines"`
@@ -51,26 +50,17 @@ func (f *Finder) Search() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var wg sync.WaitGroup
-
 	var logFiles []LogFile
-
 	for _, file := range files {
-		ch := make(chan *LogFile)
 		if strings.HasSuffix(file.Name(), ".log") {
-			wg.Add(1)
-			go f.searchFile(file.Name(), &wg, ch)
+			logFiles = append(logFiles, *f.searchFile(file.Name()))
 		}
-		f := <-ch
-		// TODO: fix deadlock
-		logFiles = append(logFiles, *f)
 	}
-	wg.Wait()
-
 	result := Result{
 		Directory: f.dirName,
 		Files:     logFiles,
 	}
+
 	var jsonData []byte
 
 	jsonData, err = json.Marshal(result)
@@ -81,43 +71,43 @@ func (f *Finder) Search() {
 }
 
 // Searches given file
-func (f *Finder) searchFile(fname string, wg *sync.WaitGroup, ch chan<- *LogFile) {
+func (f *Finder) searchFile(fname string) *LogFile {
 	file, err := os.Open(f.dirName + fname)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer file.Close()
-	defer wg.Done()
 
-	s := bufio.NewScanner(file)
-	lnum := 1
+	scanner := bufio.NewScanner(file)
+	lines := f.scanFile(scanner)
+	return &LogFile{
+		File:  file.Name(),
+		Lines: lines,
+	}
+}
 
+func (f *Finder) scanFile(scanner *bufio.Scanner) []Line {
 	var lines []Line
-
-	for s.Scan() {
-		matches := findMatch(s.Text(), f.texts)
-
+	lnum := 1
+	for scanner.Scan() {
+		matches := findMatch(scanner.Text(), f.texts)
 		if f.matchAll && matches == len(f.texts) {
 			//printLine(fname, lnum, s.Text())
-			lines = append(lines, *toJSON(lnum, s.Text()))
+			lines = append(lines, *line(lnum, scanner.Text()))
 			break
 		} else if !f.matchAll && matches > 0 {
-			printLine(fname, lnum, s.Text())
+			//printLine("file", lnum, scanner.Text())
+			lines = append(lines, *line(lnum, scanner.Text()))
 		}
 		lnum++
 	}
-	if err := s.Err(); err != nil {
+	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
-	logFile := LogFile{
-		File:  fname,
-		Lines: lines,
-	}
-
-	ch <- &logFile
+	return lines
 }
 
-func toJSON(lnum int, log string) *Line {
+func line(lnum int, log string) *Line {
 	return &Line{
 		Line: lnum,
 		Log:  log,
