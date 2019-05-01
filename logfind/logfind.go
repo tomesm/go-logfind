@@ -14,6 +14,7 @@ import (
 type Finder struct {
 	dirName  string
 	texts    []string
+	fileType string
 	matchAll bool
 }
 
@@ -36,10 +37,11 @@ type Line struct {
 }
 
 // New creates a new Finder struct to perform search
-func New(dirName string, texts []string, matchAll bool) *Finder {
+func New(dirName string, texts []string, matchAll bool, fileType string) *Finder {
 	return &Finder{
 		dirName:  fullPath(dirName),
 		texts:    texts,
+		fileType: fileType,
 		matchAll: matchAll,
 	}
 }
@@ -52,7 +54,7 @@ func (f *Finder) Search() {
 	}
 	var logFiles []LogFile
 	for _, file := range files {
-		if strings.HasSuffix(file.Name(), ".log") {
+		if strings.HasSuffix(file.Name(), f.fileType) {
 			logFiles = append(logFiles, *f.searchFile(file.Name()))
 		}
 	}
