@@ -55,10 +55,12 @@ func (f *Finder) Search() {
 	var logs []LogFile
 	for _, file := range files {
 		if strings.HasSuffix(file.Name(), f.fileType) {
-			logs = append(logs, *f.searchFile(file.Name()))
+			logFile := *f.searchFile(file.Name())
+			if logFile.Lines != nil {
+				logs = append(logs, logFile)
+			}
 		}
 	}
-	// TODO: remove null lines!!!
 	if len(logs) > 0 {
 		f.printJSON(logs)
 	}
@@ -73,32 +75,31 @@ func (f *Finder) searchFile(fname string) *LogFile {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	lines := f.scanFile(scanner)
+	var lines []Line
+	f.scanFile(scanner, &lines)
 	return &LogFile{
 		File:  file.Name(),
 		Lines: lines,
 	}
 }
 
-func (f *Finder) scanFile(scanner *bufio.Scanner) []Line {
-	var lines []Line
+func (f *Finder) scanFile(scanner *bufio.Scanner, lines *[]Line) {
 	lnum := 1
 	for scanner.Scan() {
 		matches := findMatch(scanner.Text(), f.texts)
 		if f.matchAll && matches == len(f.texts) {
 			//printLine(fname, lnum, s.Text())
-			lines = append(lines, *line(lnum, scanner.Text()))
+			*lines = append(*lines, *line(lnum, scanner.Text()))
 			break
 		} else if !f.matchAll && matches > 0 {
 			//printLine("file", lnum, scanner.Text())
-			lines = append(lines, *line(lnum, scanner.Text()))
+			*lines = append(*lines, *line(lnum, scanner.Text()))
 		}
 		lnum++
 	}
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
-	return lines
 }
 
 // print directory in JSON format
