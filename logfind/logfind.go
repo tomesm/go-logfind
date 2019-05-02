@@ -52,24 +52,16 @@ func (f *Finder) Search() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var logFiles []LogFile
+	var logs []LogFile
 	for _, file := range files {
 		if strings.HasSuffix(file.Name(), f.fileType) {
-			logFiles = append(logFiles, *f.searchFile(file.Name()))
+			logs = append(logs, *f.searchFile(file.Name()))
 		}
 	}
-	result := Result{
-		Directory: f.dirName,
-		Files:     logFiles,
+	// TODO: remove null lines!!!
+	if len(logs) > 0 {
+		f.printJSON(logs)
 	}
-
-	var jsonData []byte
-
-	jsonData, err = json.Marshal(result)
-	if err != nil {
-		return
-	}
-	fmt.Printf("%s\n", string(jsonData))
 }
 
 // Searches given file
@@ -107,6 +99,22 @@ func (f *Finder) scanFile(scanner *bufio.Scanner) []Line {
 		log.Fatal(err)
 	}
 	return lines
+}
+
+// print directory in JSON format
+func (f *Finder) printJSON(logs []LogFile) {
+	result := Result{
+		Directory: f.dirName,
+		Files:     logs,
+	}
+
+	var jsonData []byte
+
+	jsonData, err := json.MarshalIndent(result, "", "    ")
+	if err != nil {
+		return
+	}
+	fmt.Printf("%s\n", string(jsonData))
 }
 
 func line(lnum int, log string) *Line {
