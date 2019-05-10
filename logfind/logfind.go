@@ -16,6 +16,7 @@ type Finder struct {
 	texts    []string
 	fileType string
 	matchAll bool
+	format   bool
 }
 
 // Result represents formatted JSON output of the search
@@ -37,12 +38,13 @@ type Line struct {
 }
 
 // New creates a new Finder struct to perform search
-func New(dirName string, texts []string, matchAll bool, fileType string) *Finder {
+func New(dirName string, texts []string, matchAll bool, fileType string, format bool) *Finder {
 	return &Finder{
 		dirName:  fullPath(dirName),
 		texts:    texts,
 		fileType: fileType,
 		matchAll: matchAll,
+		format:   format,
 	}
 }
 
@@ -61,7 +63,7 @@ func (f *Finder) Search() {
 			}
 		}
 	}
-	if len(logs) > 0 {
+	if len(logs) > 0 && f.format {
 		f.printJSON(logs)
 	}
 }
@@ -76,24 +78,32 @@ func (f *Finder) searchFile(fname string) *LogFile {
 
 	scanner := bufio.NewScanner(file)
 	var lines []Line
-	f.scanFile(scanner, &lines)
+	f.scanFile(scanner, &lines, fname)
 	return &LogFile{
 		File:  file.Name(),
 		Lines: lines,
 	}
 }
 
-func (f *Finder) scanFile(scanner *bufio.Scanner, lines *[]Line) {
+func (f *Finder) scanFile(scanner *bufio.Scanner, lines *[]Line, fname string) {
 	lnum := 1
 	for scanner.Scan() {
 		matches := findMatch(scanner.Text(), f.texts)
 		if f.matchAll && matches == len(f.texts) {
-			//printLine(fname, lnum, s.Text())
-			*lines = append(*lines, *line(lnum, scanner.Text()))
+			// Output in JSON format else print line by line
+			if f.format {
+				*lines = append(*lines, *line(lnum, scanner.Text()))
+			} else {
+				printLine(fname, lnum, scanner.Text())
+			}
 			break
 		} else if !f.matchAll && matches > 0 {
-			//printLine("file", lnum, scanner.Text())
-			*lines = append(*lines, *line(lnum, scanner.Text()))
+			// Output in JSON format else print line by line
+			if f.format {
+				*lines = append(*lines, *line(lnum, scanner.Text()))
+			} else {
+				printLine(fname, lnum, scanner.Text())
+			}
 		}
 		lnum++
 	}
@@ -148,6 +158,5 @@ func findMatch(str string, substrs []string) int {
 }
 
 func printLine(fname string, lnum int, line string) {
-	//fmt.Printf("%s:%d:%s\n", fname, lnum, line)
-
+	fmt.Printf("%s:%d:%s\n", fname, lnum, line)
 }
