@@ -3,7 +3,7 @@ Tool for searching log files in a given directory for a given words. You can use
 
 Tool provides information about file name, line number where match(es) were found and prints the whole line from the file. All searches ignore cases so that it does not matter if you use lowercase, UPPERCASE or CamelCase.
 
-NOTE: For now matching patterns (regexp) are not supported. Only simple strings are considered"
+NOTE: For now matching patterns (regexp) are not supported. Only simple strings are considered.
 
 ## Usage
 
@@ -27,3 +27,9 @@ logfind [OPTIONS] [STRINGS]
 ##### Output:
 
 `file.log:34:This is a line where is information about Java ERROR from update`
+
+
+## TODO:
+- Add support for matching patterns
+- Add concurrency for better performance
+- Add support for configuring multiple directories where the search should be performed
