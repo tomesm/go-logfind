@@ -13,7 +13,7 @@ func main() {
 	dirname := flag.String("dirname", "/var/log", "Name of dir to search")
 	matchAll := flag.Bool("match-all", false, "Determine if search should match all searched strings")
 	fileType := flag.String("file-type", ".log", "Type/suffix of files to be searched")
-	format := flag.Bool("format", false, "Print output it JSON format")
+	format := flag.Bool("format", false, "Print output in JSON format")
 	flag.Parse()
 
 	if flag.NArg() == 0 {
@@ -25,6 +25,6 @@ func main() {
 }
 
 func myUsage() {
-	fmt.Println("Usage: logfind [OPTIONS] [TEXT]")
+	fmt.Println("Usage: logfind [OPTIONS] [STRINGS]")
 	flag.PrintDefaults()
 }
