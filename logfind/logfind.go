@@ -85,6 +85,7 @@ func (f *Finder) searchFile(fname string) *LogFile {
 	}
 }
 
+// Scans the file
 func (f *Finder) scanFile(scanner *bufio.Scanner, lines *[]Line, fname string) {
 	lnum := 1
 	for scanner.Scan() {
@@ -128,6 +129,7 @@ func (f *Finder) printJSON(logs []LogFile) {
 	fmt.Printf("%s\n", string(jsonData))
 }
 
+// Crates the new line struct
 func line(lnum int, log string) *Line {
 	return &Line{
 		Line: lnum,
@@ -135,6 +137,7 @@ func line(lnum int, log string) *Line {
 	}
 }
 
+// Creates full path if not provided by the user
 func fullPath(path string) string {
 	if !strings.HasSuffix(path, "/") {
 		return path + "/"
@@ -157,6 +160,7 @@ func findMatch(str string, substrs []string) int {
 	return matches
 }
 
+// Prints formatted line from a log file
 func printLine(fname string, lnum int, line string) {
 	fmt.Printf("%s:%d:%s\n", fname, lnum, line)
 }
